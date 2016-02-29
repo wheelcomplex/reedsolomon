@@ -3,7 +3,7 @@
 
 [1]: https://godoc.org/github.com/klauspost/reedsolomon?status.svg
 [2]: https://godoc.org/github.com/klauspost/reedsolomon
-[3]: https://travis-ci.org/klauspost/reedsolomon.svg
+[3]: https://travis-ci.org/klauspost/reedsolomon.svg?branch=master
 [4]: https://travis-ci.org/klauspost/reedsolomon
 
 Reed-Solomon Erasure Coding in Go, with speeds exceeding 1GB/s/cpu core implemented in pure Go.
@@ -87,7 +87,7 @@ So to sum up reconstruction:
 * You may only supply data you know is valid.
 * Invalid shards should be set to nil.
 
-For complete examples of and encoder and decoder see the [examples folder](https://github.com/klauspost/reedsolomon/tree/master/examples).
+For complete examples of an encoder and decoder see the [examples folder](https://github.com/klauspost/reedsolomon/tree/master/examples).
 
 # Splitting/Joining Data
 
@@ -151,6 +151,18 @@ This means that if you have a data set that may not fit into memory, you can spl
 
 This also means that you can divide big input up into smaller blocks, and do reconstruction on parts of your data. This doesn't give the same flexibility of a higher number of data shards, but it will be much more performant.
 
+# Streaming API
+
+There has been added a fully streaming API, to help perform fully streaming operations, which enables you to do the same operations, but on streams. To use the stream API, use [`NewStream`](https://godoc.org/github.com/klauspost/reedsolomon#NewStream) function to create the encoding/decoding interfaces. You can use [`NewStreamC`](https://godoc.org/github.com/klauspost/reedsolomon#NewStreamC) to ready an interface that reads/writes concurrently from the streams.
+
+Input is delivered as `[]io.Reader`, output as `[]io.Writer`, and functionality corresponds to the in-memory API. Each stream must supply the same amount of data, similar to how each slice must be similar size with the in-memory API. 
+If an error occurs in relation to a stream, a [`StreamReadError`](https://godoc.org/github.com/klauspost/reedsolomon#StreamReadError) or [`StreamWriteError`](https://godoc.org/github.com/klauspost/reedsolomon#StreamWriteError) will help you determine which stream was the offender.
+
+There is no buffering or timeouts/retry specified. If you want to add that, you need to add it to the Reader/Writer.
+
+For complete examples of a streaming encoder and decoder see the [examples folder](https://github.com/klauspost/reedsolomon/tree/master/examples).
+
+
 # Performance
 Performance depends mainly on the number of parity shards. In rough terms, doubling the number of parity shards will double the encoding time.
 
@@ -178,6 +190,7 @@ Example of performance scaling on Intel(R) Core(TM) i7-2600 CPU @ 3.40GHz - 4 ph
 * [Backblaze Open Sources Reed-Solomon Erasure Coding Source Code](https://www.backblaze.com/blog/reed-solomon/).
 * [JavaReedSolomon](https://github.com/Backblaze/JavaReedSolomon). Compatible java library by Backblaze.
 * [go-erasure](https://github.com/somethingnew2-0/go-erasure). A similar library using cgo, slower in my tests.
+* [rsraid](https://github.com/goayame/rsraid). A similar library written in Go. Slower, but supports more shards.
 * [Screaming Fast Galois Field Arithmetic](http://www.snia.org/sites/default/files2/SDC2013/presentations/NewThinking/EthanMiller_Screaming_Fast_Galois_Field%20Arithmetic_SIMD%20Instructions.pdf). Basis for SSE3 optimizations.
 
 # License
